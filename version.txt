@@ -1,0 +1,3 @@
+06679b56dc22e95247893f57d9e4e75b58a877fe append GPL
+752a3c767a7ed1a47d63026336f9881675a59dd0 add distributed
+6fc5f5d4d124b7bc9a3a79f9b7c550097813ae1b wrote a readme file
