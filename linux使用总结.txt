@@ -1,0 +1,1310 @@
+linux使用总结.txt
+
+1. 安装 openssh-server (ubuntu默认安装了 openssh-client)
+sudo apt-get install openssh-server
+
+2. 确认ssh-server是否启动了
+ps -e |grep ssh
+
+3. 启动 ssh-server
+/etc/init.d/ssh start
+
+4. 更改ssh端口
+vim /etc/ssh/sshd_config
+
+5. 重启ssh服务
+sudo /etc/init.d/ssh restart
+
+
+1. 安装上传下载服务
+sudo apt-get install lrzsz
+
+上传: rz
+下载: sz
+
+
+1. 创建 /usr/lib/jvm
+sudo mkdir /usr/lib/jvm
+
+2. 将jdk解压到 /usr/lib/jvm目录
+sudo tar -zxvf jdk-8u111-linux-x64.tar.gz -C /usr/lib/jvm
+
+3. 编辑环境变量
+sudo vim ~/.bashrc
+
+export JAVA_HOME=/usr/lib/jvm/jdk1.8.0_111
+export JRE_HOME=${JAVA_HOME}/jre
+export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+export PATH=${JAVA_HOME}/bin:$PATH
+
+4. 手动设置系统默认JDK
+cd /usr/lib/jvm/jdk1.8.0_111/
+sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk1.8.0_111/bin/java 300
+sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk1.8.0_111/bin/javac 300
+sudo update-alternatives --config java
+
+
+
+linux文件操作
+
+
+
+1. 查看当前文件夹下面的文件的详细信息
+ls -l  显示长列表信息
+ls -a  显示隐藏文件
+ls -R  显示文件树
+
+
+drwxrwxr-x 2 dom4j dom4j      4096 Nov 29 18:37 aaa
+drwxr-xr-x 2 dom4j dom4j      4096 Nov 29 07:21 Desktop
+-rw-r--r-- 1 dom4j dom4j      8980 Nov 29 06:59 examples.desktop
+-rw-r--r-- 1 dom4j dom4j 181442359 Nov 29 04:07 jdk-8u111-linux-x64.tar.gz
+
+d: 表示文件夹
+
+
+2. pwd 查看当前目录
+   cd  切换目录
+
+3. 文件夹操作
+mkdir  创建文件夹
+mkdir -p a/b/c/d/e  批量创建文件夹, (不存在的父文件夹会自动创建)
+
+rmdir a/b/c/d/  删除空文件夹 (只能删除空文件夹)  --> 这里只是删除了d文件夹, a,b,c都在
+rm -r /a/b  删除非空文件夹
+
+4. 创建文件
+echo hello world! > hello.txt    将输出的内容写入文件
+touch angular.txt   创建一个指定名称的空文件
+ll > result.txt  将前一条指令的结果写入到指定名称的文件
+vim hello.java 创建并编辑文件
+
+
+rm hello.txt   删除文件
+rm -r aaa/   删除非空文件夹
+rm -rf a  强制删除文件或文件夹
+
+cp java/Hello.java Download/  拷贝文件
+
+
+cat 查看文件内容
+
+查看大文件
+more hello.txt 可以分页查看, 空格跳到下一页
+less hello.txt 不仅可以分页看(按空格), 上下翻行(上下键), 还可以方便地搜索(先按冒号, 再按"/关键字")
+	shift+g跳转到文件尾页, gg跳转到首页
+
+tail -10 hello.txt  查看文件尾部的10行
+head -20 hello.java 查看文件的前20行
+
+程序打出的日志在生产实践中具有非凡的 debug的意义
+tail -f user.log  时时显示现实尾部的文件
+
+
+5. 文件归档和压缩  (打包--归档)
+
+tar -cvf testdir.tar testdir/   归档
+ -c  创建一个打包文档
+ -v  打印打包的进度信息
+ -f  创建打包文档的名字
+
+
+gzip testdir.tar   压缩
+
+tar -czvf java.tar.gz java/  将java文件夹下的所有文件打包并压缩成 java.tar.gz
+ -z  创建
+
+
+tar -xzvf java.tar.gz  解压到当前目录
+tar -xzvf java.tar.gz -C aaa/ 解压到指定目录
+
+
+
+6. 权限管理
+
+文件权限
+
+	权限	 	 成员	组
+drwxrwxr-x 2 dom4j dom4j      4096 Nov 29 18:37 aaa
+drwxr-xr-x 2 dom4j dom4j      4096 Nov 29 07:21 Desktop
+-rw-r--r-- 1 dom4j dom4j      8980 Nov 29 06:59 examples.desktop
+-rw-r--r-- 1 dom4j dom4j 181442359 Nov 29 04:07 jdk-8u111-linux-x64.tar.gz
+
+d: 文件夹
+r: 读
+w: 写
+x: 可执行
+
+有三个rwx
+  第一个rwx表示: 该文件所属用户对该文件的权限
+  第二个rwx表示: 该文件所属的组, 组中成员对该文件的权限
+  第三个rwx表示: 其他用户对该文件的权限
+
+
+	权限        	rwx  r-x  r--
+可以用二进制表示	111  101  100
+十进制表示		 7    5	   4
+
+
+修改权限
+
+chmod a-rwx aaa/    为所有用户取消rwx权限 (对于aaa文件夹)
+chmod u+rw aaa/		为该文件夹的所有者添加rw权限 (对于aaa文件夹)
+  a代表所有用户
+  u代表所属用户
+  g代表所数组的成员用户
+  o代表其他用户
+
+chmod 550 aaa/ 		将权限改为 r-xr-x---
+
+
+修改文件所属用户 (只能由root用户操作)
+chown dom4j:dom4j hello.txt		将文件所属于用户由root改为dom4j
+
+
+用户管理
+
+添加用户 (没有在 home目录下新建用户文件夹)
+useradd username
+
+修改密码 (重置所有用户密码)
+passwd username
+
+
+删除用户
+userdel username
+
+
+修改用户登陆名 (用户所属组和用户文件夹没有改变)
+usermod -l zs zhangsan
+
+更改用户文件夹 需要新建
+mkdir /home/zs
+
+更改系统权限为系统自动生成的权限
+chmod 700 zs/
+
+更改文件夹的所属人员, 所属组依旧为 zhangsan
+chown zs:zhangsan zs/
+
+创建用户组
+groupadd zs
+
+修改用户所数组
+usermod -g zs zs
+usermod -G zs,dom4j zs   为一个用户指定多个组 (一个人属于多个组)
+
+删除用户组
+groupdel xxx
+
+修改用户组属性
+groupmod --help
+
+查看当前登陆的身份
+whoami
+
+查看当前所属的用户组
+groups
+
+
+
+7. 系统管理 (凡是涉及到修改, 就一定要用root权限)
+
+轻易不要使用su去切换到root的身份
+普通用户使用 sudo去执行root权限的命令
+
+
+
+
+
+磁盘空间信息查看
+df -h   查看磁盘空间状态信息
+du -sh *  查看当前目录下所有子目录和文件的汇总大小
+
+
+进程信息查看
+free  查看内存使用情况
+top   查看实时刷新的系统进程信息
+
+
+ps -ef 查看系统中当前瞬间的进程信息快照
+ps -ef | grep myshell.sh  查看myshell进程的信息
+kill -9 pid   杀掉进程   (-9 表示强制杀死)
+
+
+
+8. 网络管理
+
+修改 ip地址的配置
+
+sudo vi /etc/sysconfig/network-scripts/ifcfg-eth0   修改该配置文件即可修改 ip地址
+或者在 root权限下用 setup指令通过一个带提示的伪图形界面来修改
+
+
+
+
+
+
+
+
+
+
+
+
+ubuntu 安装 Tomcat9.0.0.M13
+
+1. 将下载好的tomcat安装包复制到 /usr/local目录下
+sudo cp apache-tomcat-9.0.0.M13.tar.gz /usr/local/
+
+2. 创建apache-tomcat-9.0.0.M13目录
+sudo mkdir apache-tomcat-9.0.0.M13/
+
+3. 将压缩包解压到 apache-tomcat-9.0.0.M13目录下
+sudo tar -xzvf apache-tomcat-9.0.0.M13.tar.gz apache-tomcat-9.0.0.M13/
+
+4. 切换到root用户, 解压commons-daemon-native.tar.gz到当前目录
+su root
+tar -xzvf commons-daemon-native.tar.gz
+
+5. 解压完成后会在bin目录下生成一个commons-daemon-1.0.15-native-src目录,
+   进入./commons-daemon-1.0.15-native-src/unix目录
+cd commons-daemon-1.0.15-native-src/unix/
+
+6. 执行目录下./configure文件（注：执行此命令需配置java环境变量，如果未配置需以--with-java= 指定java安装目录）
+./configure
+
+7. 上一步成功后执行make命令
+make
+
+8. 执行成功后会在当前目录生成一个jsvc的目录，将其复制到tomcat的bin目录下，
+cp jsvc ../../
+
+9. 为Tomcat添加一个指定的用户，
+   本例中以tomcat为用户名：useradd tomcat -M -d / -s /usr/sbin/nologin。
+  （-M不创建用户主目录  -d指定用户主目录  -s指定用户shell）
+useradd tomcat -M -d / -s /usr/sbin/nologin
+
+10. 回到Tomcat安装目录的bin目录中
+cd ../../
+cd apache-tomcat-9.0.0.M13/bin/
+
+11. 用vi或者vim修改bin目录下的daemon.sh文件，设置TOMCAT_USER=tomcat,JAVA_HOME=/usr/lib/jvm/jdk1.8.0_111，保存退出
+vim daemon.sh
+JAVA_HOME=/usr/lib/jvm/jdk1.8.0_111
+
+12. 设置tomcat安装目录下所有文件的所有者和所属组为tomcat
+   （由于tomcat是由root解压的，所有文件所属权为root，如果不进行移权其他用户将无法启动tomcat服务）
+chown -R tomcat:tomcat /usr/local/apache-tomcat-9.0.0.M13
+
+13. 然后在Tomcat安装目录的bin目录下就可以使用daemon.sh start命令启动Tomcat服务
+
+
+14. 为了方便我们将Tomcat设置为服务（在init.d下创建软连接）
+ln -s /usr/local/apache-tomcat-9.0.0.M13/bin/daemon.sh /etc/init.d/apache-tomcat-9.0.0.M13
+
+15. 这样就可以使用service apache-tomcat-9.0.0.M13 start进行启动了
+service apache-tomcat-9.0.0.M13 start
+
+16. 设置Tomcat为开机自启动服务，需先将tomcat设置为服务：update-rc.d apache-tomcat-9.0.0.M13 defaults
+
+17. 如果想移除Tomcat开机自启动，执行以下命令：update-rc.d apache-tomcat-9.0.0.M13 remove
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ubuntu安装 maven
+
+1. 将压缩包解压到 /usr/local/maven/apache-maven-3.3.9
+sudo tar -xzvf apache-maven-3.3.9.tar.gz -C /usr/local/maven/apache-maven-3.3.9
+
+2. 配置环境变量
+# set maven environment
+export M2_HOME=/usr/local/maven/apache-maven-3.3.9
+export M2=$M2_HOME/bin
+export PATH=$M2:$PATH
+
+3. 使环境变量生效
+source profile
+
+
+
+ubuntu安装 sublime Text3
+
+1. 添加 sublime-Text3的仓库
+sudo add-apt-repository ppa:webupd8team/sublime-text-3
+
+2. 更新软件库
+sudo apt-get update
+
+3. 安装 Sublime Text3
+sudo apt-get install sublime-text-installer
+
+
+
+
+ubuntu安装搜狗输入法
+
+1.
+
+
+
+
+
+ubuntu安装 redis3.2.5
+
+1. 解压到 /usr/local/redis/ 目录下
+sudo tar -zxvf redis-3.2.5.tar.gz -C /usr/local/redis/
+
+2. 进入解压目录, 执行make指令
+cd /usr/local/redis/redis-3.2.5
+
+3. 安装到指定目录 (安装完成后, 只有一个 bin目录)
+sudo make PREFIX=/usr/local/redis/ install
+
+4. 从redis源码中拷贝redis.conf文件到 /usr/local/redis/目录下
+cd /usr/local/redis/redis-3.2.5
+cp redis.conf ../
+
+5. 启动redis, 需要指定配置文件
+./bin/redis-server redis.conf
+
+6. 新建窗口, 连接到redis
+cd /usr/local/redis/
+./bin/redis-cli
+
+
+
+ubuntu安装 mongodb
+
+1. 在 /usr/local/目录下创建 mongodb目录
+cd /usr/local/
+sudo mkdir mongodb
+
+2. 解压 mongodb到 /usr/local/mongodb/目录下
+sudo tar -xzvf mongodb-linux-x86_64-ubuntu1604-3.4.0.tgz -C /usr/local/mongodb/
+
+3. 设置 mongo环境变量
+sudo vim /etc/profile
+添加
+# set mongodb environment
+export PATH=/usr/local/mongodb/mongodb-linux-x86_64-ubuntu1604-3.4.0/bin:$PATH
+
+4. 进入 mongodb的 bin目录
+cd /usr/local/mongodb/mongodb-linux-x86_64-ubuntu1604-3.4.0/bin/
+
+5. 在根目录下创建两个文件夹
+sudo mkdir data
+sudo mkdir /data/db
+
+6.
+
+
+
+
+vim使用手册
+
+1. 打开文件(如果没有则创建)并编辑, 光标默认在首行
+vim hello.txt
+
+2. 打开文件, 并将光标置于尾行
+vim + hello.txt
+
+3. 光标置于第 3行 (正数)
+vim +3 hello.txt
+
+4. 光标置于imooc字符串第一次出现的行 (按 字母n 可以在该字符串出现的地方来回切换)
+vim +/imooc hello.txt
+
+5. 同时打开多个文件 (按 ':n'切换到下一个编辑项, 按 ':N'切换到上一个, 全部编辑完毕方可保存)
+vim a.txt b.txt c.txt
+
+底行模式常用命令
+
+:w  ->  将文件的修改从内存写入硬盘中 (执行保存修改操作)
+:q  ->  退出当前vim编辑器打开的文件
+:!  ->  表示强制执行
+:ls ->  列出编辑器中打开的所有文件
+:n  ->  切换到后一个文件
+:N  ->  切换到上一个文件
+:15 ->  把光标快速定位到第15行
+
+/xxx  ->  从光标开始向后搜素xxx这个字符串, 并把光标定位到第一次出现的位置
+?xxx  ->  从光标开始向前搜索xxx这个字符串, 并把光标定位到第一次出现的位置
+
+
+上述命令可组合使用
+
+:q! ->  不保存, 强制退出
+
+
+
+命令模式常用指令
+
+ h  ->  光标左移
+ j  ->  光标下移
+ k  ->  光标上移
+ l  ->  光标右移
+ ctrl + f  -> 向下翻页 (front)
+ ctrl + b  -> 向上翻页 (back)
+ ctrl + d  -> 向下翻半页 (down)
+ ctrl + u  -> 向上翻半页 (up)
+
+ dd  ->  删除光标所在行
+ o   ->  在光标所在行的下方插入一行并切换到输入模式
+ yy  ->  复制光标所在的行
+ p   ->  在光标所在行的下方粘贴
+ P   ->  在光标所在行的上方粘贴
+
+
+-----------------------------------------------------------
+
+当运行 vim时, 首先进入编辑模式
+
+编辑模式:
+  vim编辑模式的主要用途是, 在被编辑的文件中移动光标的位置, 一旦光标移到所要的位置,
+就可以进行剪切和粘贴正文块, 删除正文和插入新的正文. 当完成所有的编辑工作后, 需要保存
+编辑器结果, 退出编辑器回到终端, 可以发出ZZ命令 (连续按两次 z键)
+
+
+
+
+
+
+
+
+跳转
+
+  k, j, h, l  -> 上下左右移动, 一次移动一个字符
+  ctrl + f,   ctrl + b  ->   相当于page up 和 page down
+
+  更大范围的移动
+  *   ->  当光标留在一个单词上, *键会在文件内搜索该单词, 并跳转到下一处
+  #   ->  当光标留在一个单词上, *键会在文件内搜索该单词, 并跳转到上一处
+  (   ->  移动到前一句的开始
+  )   ->  移动到后一句的开始
+  {   ->  移动到当前段落的开始
+  }   ->  移动到下一个段落的开始
+  g_  ->  到本行最后一个不是 blank字符的位置
+  fa  ->  到下一个为a的字符处, 你也可以 fs到下一个为 s的字符
+  t,  ->  到逗号前的第一个字符, 逗号可以变成其他字符
+  3fa ->  在当行查找第三个出现的 a
+  F   ->  和f一样, 方向相反
+  T   ->  和t一样, 方向相反
+  gg  ->  将光标定位到第一行起始位置
+  G   ->  将光标定位到文件最后一行起始位置
+  NG  ->  将光标定位到第 N行的起始位置, 例如 37G
+
+
+当屏幕中找到需要的一页时, 可以用下面的命令快速移动光标
+  H   ->  将光标移动到屏幕上的起始行(或最上行)
+  M   ->  将光标移动到屏幕中间
+  L   ->  将光标移到屏幕最后一行
+ 注: 同样需要注意字母的大小写, H和L命令还可以加数字, 如 3H表示将光标移动到屏幕的第三行
+    4L表示将光标移动到屏幕的倒数第四行
+
+
+行内移动光标可以用下面的命令来实现
+  w   ->  右移光标到下一个字的开头
+  e   ->  右移光标到下一个字的结尾
+  b   ->  左移光标到前一个字的开头
+  0   ->  数字0, 左移光标到本行的开始   (home键)
+  $   ->  右移光标到本行的末尾  (end键)
+  ^   ->  移动光标, 到本行的第一个非空字符   (home键)
+
+
+搜索和匹配
+  查找文件中指定字或短语出现的位置
+  方法: 键入字符 /, 后面跟要搜索的字符串, 然后按下回车键   (正向搜索)
+    键入 n命令(next)可以继续向下搜索, 找到这一字符串下次出现的位置
+  用 ?取代 /  可以实现反向搜索
+
+  /str1   ->  正向搜索字符串 str1
+  n       ->  继续搜索, 找出 str1字符串下次出现的位置
+  N       ->  继续搜索, 找出 str1字符串上一次出现的位置
+  ?str2   ->  反向搜索字符串 str2
+
+
+替换和删除
+  vim常规的删除命令是 d, x (前者删除行, 后者删除字符), 结合 vim的其他特性可以实现
+删除的基本功能.
+  将光标定位于文件内指定位置后, 可以用其他字符来替换光标所指向的字符, 或从当前光标
+位置删除一个或多个字符或一行, 多行. 例如:
+
+  rc   ->  用 c代替光标所指向的当前字符
+  nrc  ->  用 c代替光标所指向的前 n个字符
+  5rA  ->  用 A替换光标所指向的前5个字符
+  x    ->  删除光标所指的当前字符
+  nx   ->  删除光标所指的前 n个字符
+  dw   ->  删除光标右侧的字
+  ndw  ->  删除光标右侧的 n个字    例如: 3dw
+  db   ->  删除光标左侧的字 (不包括光标所在字符)
+  ndb  ->  删除光标左侧的 n个字
+  dd   ->  删除光标所在行, 并去除空隙
+  ndd  ->  删除 n行内容, 并去除空隙
+
+
+其它常用的删除命令有:
+  d$   ->  从当前光标起删除字符直到行的结束
+  d0   ->  从当前光标起删除字符直到行的开始
+  J    ->  删除本行的回车符并和下一行合并
+
+
+vim常规的替换命令有 c和 s, 结合 vim的其他特性可以实现基础的替换功能, 不过替换命令执行
+以后, 通常会由编辑模式进入插入模式
+  s    ->  用输入的正文替换光标所指向的字符 (先删掉光标字符, 再进入插入模式)
+  S    ->  删除当前行, 并进入插入模式
+  ns   ->  用输入的正文代替光标右侧 n个字符 (包含光标)
+  nS   ->  删除当前行在内的 n行, 并进入插入模式
+  cw   ->  用输入的正文替换光标右侧的字 (包含光标)
+  cW   ->  用输入的正文替换从光标到行尾的全部字符  (cW不能使用, c$可以使用)  (同 c$)
+  ncw  ->  用输入的正文代替光标右侧的 n个字
+  cb   ->  用输入的正文替换光标左侧的字 (不包含光标)
+  ncb  ->  用输入的正文替换光标左侧的 n个字 (不包含光标)
+  cd   ->  用输入的正文替换光标的所在行 (不能使用)
+  ncd  ->  用输入的正文替换光标下面的 n行 (不能使用)
+  c$   ->  用输入的正文替换从光标开始到本行末尾的所有字符
+  c0   ->  用输入的文本替换从本行开头到光标的所有字符
+
+
+复制粘贴
+  从正文删除的内容(如字符, 字或行)并没有真正丢失, 而是被剪切并复制到了一个内存缓冲区中,
+用户可以将其粘贴到正文中的指定位置. 完成这一操作的指令是:
+  p    ->  小写字母p, 将缓冲区的内容粘贴到光标的后面
+  P    ->  大写字母P, 将缓冲区的内容粘贴到光标的前面
+
+  如果缓冲区的内容是字符或字, 直接粘贴在字符的后面或前面; 如果缓冲区的内容为整行, 执行
+上述粘贴命令, 将会粘贴到当前光标所在行的上一行或下一行
+
+  有时需要复制一段正文到新位置, 同时保留原有位置的内容. 这种情况下, 首先应当把指定内容
+复制(而不是剪切)到内存缓冲区. 完成这一操作的命令是:
+  yy   ->  复制当前行到内存缓冲区
+  nyy  ->  复制 n行内容到内存缓冲区
+  "+y  ->  复制一行到操作系统的剪切板
+  "+nyy -> 复制 n行到操作系统的剪切版
+
+
+  在 vim中快速复制粘贴多行
+
+  用 vim写代码时, 经常遇到这样的场景, 复制多行, 然后粘贴.
+  => 1. 将光标移动到要复制的文本开始的地方, 按 v进入可视模式
+     2. 将光标移动到要复制的文本的结束的地方, 按 y复制, 此时 vim会自动将光标定位到选中
+        文本开始的地方, 并退出可视模式
+     3. 移动光标, 在需要的地方粘贴
+
+  删除多行
+     dd     ->  删除当前行
+     ndd    ->  删除当前行开始的 n行 (包含当前行)
+     dw     ->  删除光标所在的字或单词
+     ndw    ->  删除光标后面的 n个字或单词 (光标及之后的会被删除, 前面的不会)
+     d$     ->  从光标所在位置删除直到本行末尾 (包括光标位置)
+     D      ->  同上
+     d)     ->  删除到下一句的开始
+     d}     ->  删除到下一段的开始
+     d+回车 ->  删除两行
+     dG     ->  删除全文
+
+  复制多行
+     9, 15 copy 16 或 9, 15 co 16   ->  将第9行到15行的数据, 复制到第16行
+     9, 15 move 16 或 9, 15 m 16    ->  将第9行到15行的数据, 剪切到第16行
+
+     ggyG      ->  复制全文
+
+
+     vim如何与剪切板交互 (将 vim的内容复制出来)
+
+     在 vim中, 使用 "*y 进行复制, 在应用程序里 ctrl + v粘贴
+     在 window中按 ctrl + c复制, 在 vim中按 shift + insert粘贴
+
+     如:
+      "*yy      复制一行
+      "*y2w     复制两个字
+
+    实现的原理是:
+      "   表示使用的是寄存器
+      "*  表示使用的是当前选择区
+
+   vim 有多个剪切板, 其中就包括了系统剪切板. 使用命令 :reg可以看到各个剪切板的内容.
+ 其中 ""表示当前使用的剪切板, "0-9"是历史剪切板, "#"就是系统剪切版 (你可以在系统里
+ 拷贝一些东西, 看是不是会出现在"#"剪切板里), 在 vim中使用 y可以吧内容拷贝到 ""剪切板
+ 继续 y会把新的东西放入 "", 而原来 ""的东西就会被压入 "0-9"的各个历史剪切板中
+
+
+
+
+
+
+
+撤销和重复
+  u    ->  撤销前一条命令的结果
+  .    ->  重复最后一条修改正文的命令
+
+
+3. 插入模式
+
+  3.1 进入插入模式
+    i    ->  在光标左侧插入正文
+    a    ->  在光标右侧插入正文
+    o    ->  在光标所在行的下一行添加新行
+    O    ->  在光标所在行的上一行添加新行
+    I    ->  在光标所在行的开头插入
+    A    ->  在光标所在行的末尾插入
+
+  3.2 退出插入模式
+    退出插入模式的方法是, 按 Esc键或组合键 ctrl + [
+    推出插入模式之后, 将会进入编辑模式
+
+
+4. 命令模式
+
+  在 vim的命令模式下, 可以使用复杂的命令. 在编辑模式下键入: , 光标就跳到屏幕的最后一行
+并在那里显示冒号, 此时已进入命令模式. 命令模式又称末行模式, 用户输入的内容均显示在屏幕
+的最后一行, 按回车键, vim执行命令.
+
+  4.1 打开, 保存和退出
+    在已经启动的vim中打开一个文件需要用 :e命令
+    :e path_to_file/file_name
+
+    保存当前编辑的文件需要用 :w命令 (write)
+    :w
+
+    将当前文件另存为 file_temp
+    :w file_temp
+
+    在编辑模式下可以用 ZZ命令退出 vim编辑程序, 该命令保存对正文所做的修改, 覆盖原始文件
+  如果只需要退出编辑程序, 而不打算保存编辑的内容, 可以使用下面的命令:
+    :q   在未作修改的情况下退出
+    :q!  放弃所有修改, 退出编辑程序.
+
+    保存并退出可以将两条命令结合起来使用 (注意命令顺序, 先保存后退出)
+    :wq
+
+
+
+  4.2 行号与文件
+    编辑中的每一行正文都有自己的行号, 用下列命令可以将光标移动到指定行 (效果与编辑模式
+  下的 ngg 或 nG相同)
+    :n   ->  将光标移动到第 n行
+
+    命令模式下, 可以规定命令操作的行号范围. 数值用来指定绝对行号; 字符"." 表示光标
+  所在行的行号; 字符符"$"表示正文最后一行的行号; 简单的表达式, 例如".+5" 表示当前行
+  往下的第 5行
+    :345   ->  将光标移到第 345行
+    :3w hello.txt   ->  将第3行写入 hello.txt文件
+    :5, 8w h.txt    ->  将第 5行至第 8行的内容写入 h.txt文件 (包括第5行和第8行)
+    :5, .w a.txt    ->  将第 5行至当前行的内容写入 a.txt文件 (包括第5行和当前行)
+    :., $w b.txt    ->  将当前行至最后一行写入b.txt 文件 (包括 ...)
+    :., .+5w c.txt  ->  从当前行开始将 6行内容写入 c.txt文件 (包括 ...)
+    :1, $w d.txt    ->  将所有内容写入 d.txt文件 (相当于 :w d.txt)
+
+    在命令模式下, 允许从文件中读取正文, 或者将正文写入文件
+    :w    ->  将编辑的内容写入原始文件, 用来保存编辑的中间结果
+    :wq   ->  将编辑的内容写入原始文件, 并退出编辑程序 (相当于ZZ命令)
+    :w a.txt   ->  将编辑的内容写入文件, 并将文件另存为 a.txt
+    :a, bw b.txt   ->  将第 a行到第 b行的内容写入 b.txt文件  (包括 ...)
+    :r c.txt   ->  读取 c.txt文件的内容, 插入当前光标所在行的后面
+    :e d.txt   ->  编辑新文件 d.txt代替原有内容, 原有内容必须先保存才能操作
+    :f a.txt   ->  将当前文件重命名为 a.txt (需要保存)
+    :f         ->  打印当前文件名称和状态, 如文件的行数, 当前光标所在的行号等
+
+
+  4.3 字符串搜索
+    在编辑模式讲过字符串的搜索, 此处的命令模式也可以进行字符串搜索, 给出一个字符串,
+  可以通过搜索该字符串到达指定行. 如果希望进行正向搜索, 将待搜索的字符串置于两个 /
+  之间; 如果希望反向搜索, 则将字符串放在两个 ?之间. 例如
+    :/str/    ->  正向搜索, 将光标移到下一个包含字符串 str的行 (n or N)
+    :?str?    ->  反向搜索, 将光标移到上一个包含字符串 str的行 (n or N)
+    :/str/w a.txt   ->  正向搜索, 并将第一个包含字符串 str的行写入 a.txt文件
+    :/str1/, /str2/w b.txt   ->  反向搜索, 并将包含字符串 str1的行至包含字符串 str2
+                                 的行写入 b.txt文件  (包含两端)
+
+
+  4.4 Vim中的正则表达式
+    当给 Vim指定搜索字符串时, 可以包含具有特殊含义的字符. 包含这些特殊字符的搜索字符串
+  称为正则表达式 (Regular Expressions).
+
+    搜索一行正文, 这行正文的开头包含 struct字
+    :/^struct/
+
+    ^      ->  放在字符串前面, 匹配行首的字
+    $      ->  放在字符串后面, 匹配行尾的字
+    \<     ->  匹配一个字的字头
+    \>     ->  匹配一个字的字尾
+    .      ->  匹配任何单个正文字符
+    [str]  ->  匹配 str中任意单个字符
+    [^str] ->  匹配任何不在 str中的单个字符
+    [a-z]  ->  匹配 a到 z之间的任意字符
+    *      ->  前一个字符出现 0次或多次
+    \      ->  转义后面的字符
+
+补充
+  正则表达式的构造摘要
+
+    构造              匹配
+
+    字符
+    x                 字符x
+    \\                反斜杠字符
+    \0n               带有八进制值 0的字符 n   (0 <= n <= 7)
+    \0nn              带有八进制值 0的字符 nn  (0 <= n <= 7)
+    \0mnn             带有八进制值 0的字符 mnn (0 <= m <= 3,  0 <= n <= 7)
+    \xhh              带有十六进制值 0x 的字符 hh
+    \uhhhh            带有十六进制值 0x 的字符hhhh
+    \t                制表符 ('\u0009')
+    \n                换行符 ('\u000A')
+    \r                回车符 ('\u000D')
+    \f                换页符 ('\u000C')
+    \a                报警(bell)符 ('\u0007')
+    \e                转义符 ('\u001B')
+    \cX               对应于 x的控制符
+
+    字符类
+    [abc]             a 或 b 或 c (简单类)
+    [^abc]            任何字符, 除了a,b,c (否定)
+    [a-zA-Z]          a到 z, 或 A到 Z, 两头的字母包括在内 (范围)
+    [a-d[m-p]]        a到 d, 或 m到 p, 等同 [a-dm-p]  (并集)
+    [a-z&&[def]]      d, e或 f (交集)
+    [a-z&&[^bc]]      a到 z, 除了b和 c,  等同[ad-z]  (减去)
+    [a-z&&[^m-p]]     a到 z, 而非m到 p,  等同[a-lq-z]  (减去)
+
+    预定义字符类
+    .                 任何字符 (与行结束符可能匹配也可能不匹配)
+    \d                数字, [0-9]
+    \D                非数字, [^0-9]
+    \s                空白字符: [ \t\n\x0B\f\r]
+    \S                非空白字符 [^\s]
+    \w                单词字符: [a-zA-Z_0-9]
+    \W                非单词字符:  [^\w]
+
+    java.lang.Character类 (简单的 Java字符类型)
+    \p{javaLowerCase}     等效于 java.lang.Character.isLowerCase()
+    \p{javaUpperCase}     等效于 java.lang.Character.isUpperCase()
+    \p{javaWhitespace}    等效于 java.lang.Character.isWhitespace()
+    \p{javaMirrored}      等效于 java.lang.Character.isMirrored()
+    注: 上述四个全部是匹配单个字符, 匹配多个字符应加数量词
+
+    Unicode块和类别的类
+    \p{InGreek}           Greek块(简单块)中的字符
+    \p{Lu}                大写字母(简单类别)
+    \p{Sc}                货币符号
+    \P{InGreek}           所有字符, Greek块中的除外 (否定)
+    [\p{L}&&[^\p{Lu}]]    所有字母, 大写字母除外 (减去)
+
+    边界匹配器
+    ^                 行的开头
+    $                 行的结尾
+    \b                单词边界
+    \B                非单词边界
+    \A                输入的开头
+    \G                上一个匹配的结尾
+    \Z                输入的结尾, 仅用于最后的结束符 (如果有的话)
+    \z                输入的结尾
+
+    Greedy数量词
+    X?                X, 0次或 1次
+    X+                X, 一次或多次
+    X*                X, 0次或多次
+    X{n}              X, 恰好 n次
+    X{n,}             X, 至少 n次
+    X{n,m}            X, 至少 n次, 但不超过 m次
+
+
+
+---------------------------------------------------------
+
+  4.5 正文替换
+    利用 :s命令可以实现字符串的替换. 具体用法包括
+
+    :%s/str1/str2       用字符串 str2替换行中首次出现的字符串 str1
+    :s/str1/str2/g      用字符串 str2替换行中所有出现的字符串 str1
+    :.,$ s/str1/str2/g  用字符串 str2替换正文当前行到末尾所有出现的字符串 str1
+    :1,$ s/str1/str2/g  用字符串 str2替换正文中所有出现的字符串 str1
+    :g/str1/s//str2/g   功能同上
+    :m, ns/str1/str2/g  将从 m行到 n行的 str1替换成 str2
+
+    从上述替换命令可以看到
+    1. g放在命令末尾, 表示对搜索字符串的每次出现进行替换, 不止匹配每行的第一次出现;
+      不加g, 表示只对搜索字符串的首次出现进行替换.
+      g放在命令开头, 表示对正文中所有包含搜索字符串的行进行替换操作.
+    2. s表示后面跟着一串替换的命令.
+    3. %表示替换的范围是所有行, 即全文.
+
+    另外一个实用的命令, 在 vim中统计当前文件中字符串 str1出现的次数, 可以替换命令的变形
+    :%s/str1/&/gn
+
+
+  4.6 删除正文
+
+    在命令模式下, 同样可以删除正文的内容. 例如
+    :d    ->  删除光标所在行
+    :3d   ->  删除3行
+    :.,$ d   ->  删除当前行直至正文末尾
+    :/str1/, /str2/d               ->  删除从字符串 str1到 str2的所有行
+    :g/^\(.*\)$\n\1$/d             ->  删除连续相同的行, 保留最后一行
+    :g/\%(^\1$\n\)\@<=\(.*\)$/d    ->  删除连续相同的行，保留最开始一行
+    :g/^\s*$\n\s*$/d               ->  删除连续多个空行，只保留一行空行
+    :5,20s/^#//g                   ->  删除5到20行开头的 # 注释
+
+    vim的初级删除命令是 d, 高级删除命令可以使用 正则替换的方式
+
+
+  4.7 恢复文件
+
+    Vim在编辑某个文件时, 会另外生成一个临时文件, 这个文件名称通常以 .开头, 并以 .swp
+  结尾. Vim在正常退出时, 该文件被删除, 若意外退出, 而没有保存文件的最新修改内容,
+  则可以使用恢复命令 :recover来恢复文件, 也可以在启动 Vim时用 -r选项
+
+
+  4.8 选项设置
+    为控制不同的编辑功能, Vim提供了很多内部选项. 利用 :set命令可以设置选项.
+  基本语法为:
+    :set option           设置选项 option
+
+    常见的功能选项包括:
+    autoindent            设置该选项, 则正文自动缩进
+    ignorecase            设置该选项, 则忽略规则表达式中大小写的区别
+    number                设置该选项, 则设置正文行号
+    ruler                 设置该选项, 则在屏幕底部显示光标所在行, 列的位置
+    tabstop               设置按 tab键跳过的空格数, 例如 :set tabstop=n, n的默认值为8
+    mk                    将选项保存在当前目录的 .exrc文件中
+
+
+  4.9 Shell切换
+
+    当处于编辑的对话过程中时, 可能需要执行一些 linux命令. 如果需要保存当前的结果,
+  退出编辑程序, 再执行所需的 linux命令, 然后再回头继续编辑过程, 就显得十分累赘.
+  如果能在编辑的环境中运行 linux命令就要省事得多. 在 vim中, 可以用下面的命令来做到这一点
+    :!shell_command        执行完 shell_command后回到 vim
+
+    这称为 shell切换, 他允许执行任何可以在标准的 Shell提示符下执行的命令. 当这条命令
+  执行完毕, 控制返回给编辑程序, 又可以继续编辑对话过程.
+
+
+  4.10 分屏和标签页
+
+    分屏
+
+    普通的 vim模式, 打开一个 vim程序只能查看一个文件, 如果想同时查看多个文件,
+  就需要用到 Vim分屏和标签页功能
+    Vim的分屏, 主要有两种方式: 上下分屏(水平分屏)和左右分屏(垂直分屏), 在命令模式下
+  分别敲入一下命令即可
+    :split (可用缩写 :sp)         上下分屏
+    :vsplit (可用缩写 :vsp)       左右分屏
+
+    另外, 也可以在终端里启动 vim时就开启分屏操作
+     vim -On file1 file2          打开 file1和 file2, 垂直分屏
+     vim -on file1 file2          打开 file1和 file2, 水平分屏
+
+    理论上, 一个 vim窗口, 可以分为多个 vim屏幕, 切换屏幕需要用键盘快捷键, 命令分别有:
+    ctrl + w + h                  切换到当前分屏的左边一屏
+    ctrl + w + l                  切换到当前分屏的右边一屏
+    ctrl + w + k                  切换到当前分屏的上边一屏
+    ctrl + w + j                  切换到当前分屏的右边一屏
+
+    即键盘上的 h,j,k,l 4个Vim专有方向键, 配合 ctrl键加 w键(window), 就能跳转到目标
+  分屏. 另外, 也可以按 ctrl + w + w来跳转分屏, 不过跳转方向则是在当前 Vim的所有分屏
+  中, 按照逆时针方向跳转
+    下面是改变尺寸的一些操作, 主要是高度, 对于宽度你可以使用 ctrl + w + < 或是
+  ctrl + w + >   这可能需要最新的版本才支持
+
+    ctrl + w =        让所有的屏都有一样的高度
+    ctrl + w +        增加高度
+    ctrl + w -        减少高度
+
+
+    标签页
+
+    Vim的标签(tab)页, 类似浏览器的标签页, 一个标签页打开一个 Vim窗口, 一个 Vim的窗口
+  支持 n个分屏
+    在 Vim中新建一个标签的指令是
+    :tabnew
+
+    如果要在新建标签页的同时打开一个文件, 则可以在命令后面直接附带文件路径
+    :tabnew filename
+
+    Vim中的每个标签页有一个唯一的数字序号, 第一个标签页的序号是 0, 从左向右依次加一
+  关于标签页有一系列操作指令, 简介如下
+    :tN[ext]          跳转到上一个匹配的标签
+    :tabN[ext]        跳转到上一个标签页
+    :tabc[lose]       关闭当前标签页
+    :tabdo            为每个标签页执行命令
+    :tabe[dit]        在新标签页里编辑文件
+    :tabf[ind]        寻找 path里的文件, 并在新标签页里编辑之
+    :tabfir[st]       转到第一个标签页
+    :tabl[ast]        转到最后一个标签页
+    :tabm[ove]        把标签页移到序号为 N的位置
+    :tabnew filename  在新标签页里编辑文件
+    :tabn[ext]        转到下一个标签页
+    :tabo[nly]        关闭所有除了当前标签页以外的所有标签页
+    :tabp[revious]    转到前一个标签页
+    :tabr[ewind]      转到第一个标签页
+
+
+  4.11 与外部工具集成
+
+    Vim可以与很多外部程序集成, 功能十分强大, 比如 diff, ctags, sort, xxd等等, 下面
+  选取几个简单介绍以下
+
+    diff
+    linux结合 diff用来对比两个文件的内容, 不过对比结果显示在终端里, 可读性比较差.
+  结合 vim, 在终端里可以直接输入 vindiff, 后面跟两个文件名作为参数
+    vimdiff file1 file2
+
+    即可在 Vim里分屏显示两个文件内容的对比结果, 对文件内容差异部分进行高亮标记, 还可以
+  同步滚动两个文件内容, 更可以同时修改文件内容, 方便程度和用户体验大大提高.
+    如果直接给 -d选项是一样的
+    vim -d file1 file2
+
+    除了在终端里开启 vimdiff功能, 也可以打开 Vim后, 在 vim的命令模式输入相关命令来开启
+  vimdiff功能
+    :diffsplit file2
+
+    如果你现在已经开启了一个文件, 想让 vim帮你区分当年文件和 abc.txt有什么区别, 可以在
+  Vim中用 diffsplit的方式打开第二个文件, 这时候 Vim会用 split (分上下两屏)的方式开启
+  第二个文件, 并且通过颜色, fold来显示两个文件的区别
+
+    通过 :diffpatch 你的patch文件名, 就可以以当前文件加上你的 patch来显示, vim会 split
+  一个新的屏,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------
+
+ubuntu安装 pyhton-pip
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+linux 磁盘管理
+
+ df查看磁盘分区使用情况
+    -l 只显示本地磁盘(默认)
+    -a 显示所有文件系统的磁盘的使用情况,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------
+
+prompt: 命令提示符
+#: root用户
+$: 普通用户
+
+shell 工作环境
+	环境变量
+
+	何谓变量?
+		命名的内存空间
+
+
+printenv: 打印系统环境变量
+
+
+发出指令
+应用程序
+
+命令: 内部命令 外部命令
+
+bash(由 shell程序自带的命令, 就叫内部命令)
+
+外部命令: 在系统的某个路径下, 有一个与命令同名的可执行程序
+
+
+type command : 判断 command是内部的还是外部的
+
+
+路径: 定位一个文件的定位符
+
+pwd  print working directory
+
+
+
+命令格式
+
+COMMAND [options] [arguments]
+
+选项: 用于调整命令执行行为的开关
+	短选项: -h, -l, -s (如果不组合使用的话, 选项之间用空格隔开)
+		有些命令的短选项可以组合使用
+		有些命令的短选项可以不带 '-', 通常称作BSD风格的选项,  ps aux, tar xf
+		有些命令的短选项需要带参数, 用于定义这个选项所接受参数或要定义的具体的特征, 选项和参数有的需要用空格隔开, 有的不需要
+	长选项: --help  --list
+		长选项通常不能组合
+		如果需要参数, 长选项的参数通常需要使用'='号, 如 --size=1G
+
+参数: 命令的作用对象
+
+
+
+如何获取命令帮助信息
+
+内部命令:
+# help command
+
+外部命令:
+# command --help
+# man command  (打开该命令的使用手册)
+# man 章节号 command
+
+man: manual 使用手册
+	有章节概念, 通常有8个章节
+		1. 普通用户可以使用的命令
+		2. 系统调用
+		3. 库调用
+		4. 特殊文件: /dev/tty1
+		5. 文件格式(命令的配置文件的语法)
+		6. 游戏相关
+		7. 杂项
+		8. 管理员命令  fdisk
+
+man命令翻屏操作
+	向后翻: space键
+	向前翻: b键
+
+	向后翻一行: 回车键
+	向前翻一行: k键
+
+	退出: q键
+
+	搜索:
+		/keyword: 从文件头部向尾部搜索
+		?keyword: 从文件尾部向首部搜索
+	下一个: n    next
+	上一个: N    previous
+
+
+
+
+[] : 可选内容
+<> : 必须给出的内容
+a|b|c : 多选一
+... : 可以有多个
+{} : 可展开
+
+
+passwd: 更改用户密码
+fdisk: 磁盘分区
+
+
+
+
+# info command  (man命令的补充)
+	有超链接的文档
+
+
+README
+
+/usr/share/doc/API_NAME-version
+README INSTALLATION
+
+
+
+
+-----------------------------------------------------------------
+
+linux日期操作
+
+date [OPTION]... [+FORMAT]
+
+大写单词通常要替换
+
+显示小时
+date +%H
+
+显示分钟
+
+%Y 		year
+%m 		month (1-12)
+%e 		day of month
+
+%H		hour (0-23, 正常时间,不需要+1)
+%M   	minute (00-59)
+%S 		seconds (00-60)
+
+%j 		day of year (001-366)
+%d 		day of month
+
+%u    day of week (1-7)  1 is Monday
+%w    day of week (0-6)  0 is Sunday
+%W    week number of year (00-53)
+
+%X
+
+
+
+-------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------
+
